@@ -1,0 +1,2532 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Free Fire Tournament | Strike Esports</title>
+
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700&family=Inter:wght@400;500;600&display=swap');
+
+:root {
+    --bg: #040805;
+    --bg-card: #0A110F;
+    --primary: #10B981;
+    --primary-dark: #059669;
+    --primary-glow: #34D399;
+    --text: #ECFDF5;
+    --text-dim: #9CA3AF;
+    --border: #1F2937;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+html { scroll-behavior: smooth; }
+
+body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Inter', sans-serif;
+    overflow-x: hidden;
+    transition: background 0.1s;
+}
+
+/* TARGETED LIGHTNING STRIKE */
+.lightning-canvas {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    pointer-events: none;
+    z-index: 9999;
+}
+
+.lightning-bolt {
+    fill: none;
+    stroke: #ffffff;
+    stroke-width: 4;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    filter: drop-shadow(0 0 4px var(--primary-glow)) drop-shadow(0 0 15px var(--primary));
+    opacity: 0;
+}
+
+.lightning-bolt.strike {
+    animation: flash-strike 0.45s ease-out forwards;
+}
+
+@keyframes flash-strike {
+    0% { opacity: 1; }
+    15% { opacity: 0.2; }
+    30% { opacity: 1; }
+    45% { opacity: 0.1; }
+    100% { opacity: 0; }
+}
+
+/* RANDOM TOP-DOWN LIGHTNING */
+.bolt-overlay {
+    position: fixed;
+    top: 0;
+    left: 50%;
+    transform: translateX(-50%) translateY(-100%);
+    width: 180px;
+    height: 65vh;
+    pointer-events: none;
+    opacity: 0;
+    z-index: 999;
+}
+
+.bolt-overlay svg {
+    width: 100%;
+    height: 100%;
+}
+
+.bolt-line {
+    fill: none;
+    stroke: #ffffff;
+    stroke-width: 4;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    filter: drop-shadow(0 0 4px var(--primary-glow)) drop-shadow(0 0 15px var(--primary));
+}
+
+.bolt-overlay.strike {
+    animation: strike-down-flash 0.45s ease-out forwards;
+}
+
+@keyframes strike-down-flash {
+    0% {
+        transform: translateX(-50%) translateY(-100%);
+        opacity: 0;
+    }
+    1% {
+        transform: translateX(-50%) translateY(0);
+        opacity: 1;
+    }
+    15% { opacity: 0.1; }
+    30% { opacity: 1; }
+    45% { opacity: 0.2; }
+    100% {
+        transform: translateX(-50%) translateY(0);
+        opacity: 0;
+    }
+}
+
+body.flash {
+    animation: screen-flash 0.45s ease-out;
+}
+
+@keyframes screen-flash {
+    0%, 100% { background: var(--bg); }
+    10% { background: #0A1F17; }
+    20% { background: var(--bg); }
+    30% { background: #0A1F17; }
+}
+
+/* ===== NAV - LOGO + BUTTONS TOP ROW ===== */
+nav {
+    display: block;
+    padding: 1rem 5%;
+    background: rgba(4, 8, 5, 0.95);
+    backdrop-filter: blur(12px);
+    position: fixed;
+    width: 100%;
+    z-index: 100;
+    border-bottom: 1px solid rgba(16, 185, 129, 0.15);
+}
+
+.nav-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.8rem;
+}
+
+.logo { 
+    display: flex; 
+    align-items: center; 
+    gap: 0.8rem;
+    font-family: 'Rajdhani', sans-serif; 
+    font-size: 1.4rem; 
+    font-weight: 700; 
+    color: var(--text);
+}
+
+.logo-icon {
+    width: 32px; 
+    height: 32px;
+    position: relative;
+    filter: drop-shadow(0 0 10px var(--primary-glow));
+}
+.logo-icon::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: var(--primary);
+    clip-path: polygon(25% 0%, 75% 0%, 100% 50%, 75% 100%, 25% 100%, 0% 50%);
+}
+.logo-icon::after {
+    content: '';
+    position: absolute;
+    top: 50%; left: 50%;
+    width: 140%; height: 3px;
+    background: var(--primary-glow);
+    transform: translate(-50%, -50%) rotate(-30deg);
+    box-shadow: 0 0 12px var(--primary-glow);
+}
+
+.nav-btns { 
+    display: flex; 
+    gap: 0.6rem; 
+}
+
+.btn {
+    padding: 0.5rem 1rem; 
+    border-radius: 6px; 
+    font-weight: 600;
+    cursor: pointer; 
+    transition: 0.3s; 
+    border: none; 
+    font-size: 0.75rem;
+    letter-spacing: 0.5px;
+    position: relative;
+    overflow: hidden;
+    font-family: 'Rajdhani', sans-serif;
+}
+.btn-outline { 
+    background: rgba(16, 185, 129, 0.1); 
+    color: var(--text); 
+    border: 1px solid rgba(16, 185, 129, 0.3); 
+}
+.btn-outline:hover { background: rgba(16, 185, 129, 0.2); }
+.btn-primary { 
+    background: var(--primary); 
+    color: #040805; 
+    box-shadow: 0 0 20px rgba(16, 185, 129, 0.4);
+}
+.btn-primary:hover { 
+    background: var(--primary-dark);
+    box-shadow: 0 0 30px rgba(16, 185, 129, 0.7); 
+    transform: translateY(-2px); 
+}
+
+.btn::before {
+    content: '';
+    position: absolute;
+    top: -50%; left: -50%;
+    width: 200%; height: 200%;
+    background: linear-gradient(45deg, transparent, rgba(255,255,255,0.4), transparent);
+    transform: rotate(45deg) translateX(-100%);
+    transition: 0.5s;
+}
+.btn:hover::before {
+    animation: lightning-sweep 0.5s;
+}
+@keyframes lightning-sweep {
+    0% { transform: rotate(45deg) translateX(-100%); }
+    100% { transform: rotate(45deg) translateX(100%); }
+}
+
+.nav-links {
+    display: flex !important;
+    justify-content: space-between;
+    width: 100%;
+    padding: 0.8rem 0 0;
+    border-top: 1px solid rgba(16, 185, 129, 0.15);
+    gap: 0;
+}
+
+.nav-links a {
+    color: var(--text-dim) !important;
+    text-decoration: none !important;
+    font-size: 0.75rem;
+    letter-spacing: 0.5px;
+    font-weight: 600;
+    position: relative;
+    transition: all 0.3s ease;
+    text-transform: uppercase;
+    font-family: 'Rajdhani', sans-serif;
+    white-space: nowrap;
+}
+
+.nav-links a:visited {
+    color: var(--text-dim) !important;
+}
+
+.nav-links a:hover {
+    color: var(--primary) !important;
+    text-shadow: 0 0 15px var(--primary-glow);
+}
+
+.nav-links a.active {
+    color: var(--primary) !important;
+    text-shadow: 0 0 12px var(--primary-glow);
+}
+
+.nav-links a.active::after {
+    content: '';
+    position: absolute;
+    bottom: -6px;
+    left: 0;
+    width: 100%;
+    height: 2px;
+    background: #8b5cf6;
+    box-shadow: 0 0 8px #8b5cf6;
+    border-radius: 2px;
+}
+
+/* DESKTOP NAV */
+@media (min-width: 1024px) {
+    nav {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 1.2rem 6%;
+    }
+    
+    .nav-top {
+        margin-bottom: 0;
+    }
+    
+    .logo {
+        font-size: 1.6rem;
+    }
+    
+    .logo-icon {
+        width: 36px;
+        height: 36px;
+    }
+    
+    .nav-links {
+        border-top: none;
+        padding: 0;
+        width: auto;
+        gap: 2.5rem;
+        margin: 0 2rem;
+    }
+    
+    .nav-links a {
+        font-size: 0.9rem;
+        letter-spacing: 1px;
+    }
+    
+    .nav-btns .btn {
+        padding: 0.65rem 1.6rem;
+        font-size: 0.85rem;
+    }
+}
+
+.hero {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    padding: 0 6%;
+    position: relative;
+    background: var(--bg);
+    overflow: hidden;
+}
+
+.hero::before {
+    content: '';
+    position: absolute;
+    top: 50%; right: 15%;
+    width: 700px; height: 700px;
+    background: radial-gradient(circle, rgba(16, 185, 129, 0.3) 0%, transparent 60%);
+    transform: translate(50%, -50%);
+    filter: blur(100px);
+    z-index: 1;
+    animation: aura 8s ease-in-out infinite;
+}
+
+@keyframes aura {
+    0%, 100% { opacity: 0.4; transform: translate(50%, -50%) scale(0.9); }
+    50% { opacity: 0.9; transform: translate(50%, -50%) scale(1.1); }
+}
+
+.hero-content { 
+    max-width: 600px; 
+    z-index: 10; 
+    position: relative;
+    text-shadow: 0 2px 20px rgba(4, 8, 5, 0.8);
+}
+
+.hero-visual {
+    position: absolute;
+    right: 0;
+    top: 0;
+    width: 50%;
+    height: 100%;
+    z-index: 2;
+    pointer-events: none;
+}
+
+.samurai-img {
+    position: absolute;
+    right: 0; 
+    bottom: 0;
+    height: 100%; 
+    width: auto;
+    object-fit: contain;
+    object-position: right bottom;
+    opacity: 1;
+    z-index: 1;
+    filter: drop-shadow(0 0 40px rgba(16, 185, 129, 0.6));
+}
+
+.samurai-cutout {
+    position: absolute;
+    right: 0; 
+    bottom: 0;
+    height: 100%; 
+    width: auto;
+    object-fit: contain;
+    object-position: right bottom;
+    z-index: 2;
+    pointer-events: none;
+}
+
+.katana-glow {
+    position: absolute;
+    z-index: 3;
+    pointer-events: none;
+    bottom: 28%;
+    right: 12%;
+    width: 2px;
+    height: 22%;
+    background: linear-gradient(to top, transparent, #00ffff, #ffffff, #00ffff, transparent);
+    filter: blur(2px) drop-shadow(0 0 8px #0ff);
+    transform: rotate(15deg);
+    transform-origin: bottom center;
+    opacity: 0.6;
+    animation: katanaBreath 3s ease-in-out infinite;
+}
+
+@keyframes katanaBreath {
+    0%, 100% { opacity: 0.5; }
+    50% { opacity: 0.9; filter: blur(3px) drop-shadow(0 0 20px #0ff); }
+}
+
+@keyframes katanaFlash {
+    20% { 
+        opacity: 1; 
+        width: 6px; 
+        filter: blur(1px) drop-shadow(0 0 25px #fff) drop-shadow(0 0 50px #0ff); 
+    }
+}
+
+.rain {
+    position: absolute;
+    inset: 0;
+    z-index: 5;
+    pointer-events: none;
+}
+.rain::before, .rain::after, .rain .layer3 {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image: 
+        linear-gradient(transparent, transparent 35%, rgba(16, 185, 129, 0.3) 35.5%, transparent 36%),
+        linear-gradient(90deg, transparent, transparent 35%, rgba(52, 211, 153, 0.2) 35.5%, transparent 36%);
+    background-size: 2px 50px, 50px 2px;
+    animation: rain-fall 0.25s linear infinite;
+}
+.rain::after {
+    animation-delay: 0.1s;
+    opacity: 0.7;
+    background-size: 1.5px 40px, 40px 1.5px;
+    animation-duration: 0.3s;
+}
+.rain .layer3 {
+    position: absolute;
+    inset: 0;
+    animation-delay: 0.15s;
+    opacity: 0.5;
+    background-size: 1px 30px, 30px 1px;
+    animation-duration: 0.2s;
+}
+
+@keyframes rain-fall {
+    from { background-position: 0 -50px, -50px 0; }
+    to { background-position: 0 0, 0 0; }
+}
+
+.hero::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: rgba(52, 211, 153, 0);
+    z-index: 4;
+    pointer-events: none;
+    animation: thunder 12s infinite;
+}
+@keyframes thunder {
+    0%, 95%, 100% { background: rgba(52, 211, 153, 0); }
+    96% { background: rgba(52, 211, 153, 0.1); }
+    97% { background: rgba(52, 211, 153, 0); }
+    98% { background: rgba(52, 211, 153, 0.15); }
+    99% { background: rgba(52, 211, 153, 0); }
+}
+
+.hero-tag { 
+    color: var(--primary); 
+    font-size: 0.85rem; 
+    letter-spacing: 4px; 
+    margin-bottom: 1.2rem; 
+    font-weight: 600;
+}
+.hero h1 {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 5rem; 
+    line-height: 1; 
+    font-weight: 700;
+    margin-bottom: 1.5rem;
+    text-shadow: 0 0 30px rgba(16, 185, 129, 0.6);
+}
+.hero p { 
+    color: var(--text-dim); 
+    font-size: 1.05rem; 
+    line-height: 1.8; 
+    margin-bottom: 2.5rem; 
+    max-width: 480px; 
+}
+.hero-btns { display: flex; gap: 1rem; }
+
+.features {
+    display: grid; 
+    grid-template-columns: repeat(4, 1fr);
+    gap: 2rem; 
+    padding: 4rem 6%; 
+    background: #030504;
+    border-top: 1px solid rgba(16, 185, 129, 0.1);
+    border-bottom: 1px solid rgba(16, 185, 129, 0.1);
+}
+.feature { text-align: left; }
+.feature i { 
+    color: var(--primary); 
+    font-size: 1.6rem; 
+    margin-bottom: 1rem;
+    filter: drop-shadow(0 0 8px var(--primary-glow));
+}
+.feature h3 { 
+    font-family: 'Rajdhani', sans-serif; 
+    font-size: 1rem; 
+    margin-bottom: 0.5rem; 
+    letter-spacing: 1px;
+}
+.feature p { color: var(--text-dim); font-size: 0.85rem; line-height: 1.6; }
+
+.section { padding: 5rem 6%; background: var(--bg); }
+.section-header {
+    display: flex; 
+    justify-content: space-between; 
+    align-items: center; 
+    margin-bottom: 2.5rem;
+    width: 100%;
+    max-width: 900px;
+    margin-left: auto;
+    margin-right: auto;
+}
+.section-header h2 { 
+    font-family: 'Rajdhani', sans-serif; 
+    font-size: 1.8rem; 
+    letter-spacing: 1px;
+}
+.section-header a { 
+    color: var(--primary); 
+    text-decoration: none; 
+    font-size: 0.9rem;
+    transition: 0.3s;
+}
+.section-header a:hover { text-shadow: 0 0 10px var(--primary-glow); }
+
+.content-grid { display: grid; grid-template-columns: 2fr 1fr; gap: 2rem; }
+
+.content-grid > div:first-child {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+}
+
+/* ===== STRIKE 3D COVER FLOW ===== */
+.carousel {
+    position: relative;
+    width: 100%;
+    max-width: 900px;
+    height: 530px;
+    perspective: 1200px;
+    overflow: hidden;
+    margin: 2rem auto;
+    touch-action: none;
+    -webkit-user-select: none;
+    user-select: none;
+    transform-style: preserve-3d;
+}
+
+.card {
+    position: absolute;
+    width: 280px;
+    height: 380px;
+    right: 50%;
+    left: 66%;
+    top: 86%;
+    bottom: 50%;
+    border-radius: 16px;
+    overflow: hidden;
+    transform-style: preserve-3d;
+    transition: transform .75s cubic-bezier(.23,1,.32,1), opacity .75s ease;
+    box-shadow: 0 25px 50px rgba(0,0,0,.7);
+    cursor: pointer;
+    will-change: transform;
+    border: 1px solid rgba(16, 185, 129, 0.2);
+    backface-visibility: hidden;
+    margin-left: -140px;
+    margin-top: -190px;
+}
+
+.card:hover {
+    border-color: var(--primary);
+    box-shadow: 0 25px 60px rgba(16, 185, 129, 0.5);
+}
+
+/* Base poster styles */
+.valorant-poster,
+.freefire-poster,
+.bgmi-poster,
+.minecraft-poster {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-end;
+    padding: 2rem 1.5rem;
+    position: relative;
+}
+
+.valorant-poster::before,
+.freefire-poster::before,
+.bgmi-poster::before,
+.minecraft-poster::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to top, rgba(4,8,5,0.98) 0%, rgba(4,8,5,0.4) 50%, transparent 100%);
+    z-index: 1;
+}
+
+.game-title {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 2.2rem;
+    font-weight: 700;
+    color: var(--text);
+    z-index: 2;
+    text-shadow: 0 4px 20px rgba(0,0,0,.9);
+    letter-spacing: 1px;
+    line-height: 1;
+}
+
+.game-tag {
+    font-size: 0.75rem;
+    color: var(--primary);
+    z-index: 2;
+    letter-spacing: 3px;
+    margin: 0.5rem 0 1.2rem;
+    font-weight: 600;
+    text-transform: uppercase;
+}
+
+.game-join {
+    z-index: 2;
+    width: 100%;
+    padding: 0.85rem!important;
+    font-size: 0.8rem!important;
+}
+
+/* Game Backgrounds */
+.valorant-poster {
+    background: url("valorant.jpg") center/cover, linear-gradient(135deg,#ff4655,#1f2326);
+    background-blend-mode: overlay;
+}
+
+.freefire-poster {
+    background: url("freefire.jpg") center/cover, linear-gradient(135deg,#ffb300,#ff6a00);
+    background-blend-mode: overlay;
+}
+
+.bgmi-poster {
+    background: url("bgmi.jpg") center/cover, linear-gradient(135deg,#f4a100,#222);
+    background-blend-mode: overlay;
+}
+
+.minecraft-poster {
+    background: url("minecraft.jpg") center/cover, linear-gradient(135deg,#4caf50,#1b5e20);
+    background-blend-mode: overlay;
+}
+
+/* Reflection */
+.card::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 100%;
+    width: 100%;
+    height: 100%;
+    background: inherit;
+    transform: scaleY(-1);
+    opacity: .2;
+    filter: blur(2px);
+    mask-image: linear-gradient(to bottom, rgba(0,0,0,.6) 0%, transparent 70%);
+    -webkit-mask-image: linear-gradient(to bottom, rgba(0,0,0,.6) 0%, transparent 70%);
+    pointer-events: none;
+}
+
+/* CENTERED CONTROLS */
+.controls {
+    margin: 30px auto 0;
+    display: flex;
+    gap: 15px;
+    align-content: center;
+    justify-content: center;
+    width: 100%;
+    max-width: 900px;
+    left: 120%;
+}
+
+.controls button {
+    padding: 12px 24px;
+    border: none;
+    border-radius: 10px;
+    background: rgba(16, 185, 129, 0.1);
+    color: var(--text);
+    border: 1px solid rgba(16, 185, 129, 0.3);
+    font-weight: 600;
+    cursor: pointer;
+    transition: .25s;
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 0.85rem;
+    letter-spacing: 0.5px;
+}
+
+.controls button:hover {
+    background: rgba(16, 185, 129, 0.2);
+    border-color: var(--primary);
+    transform: translateY(-2px);
+    box-shadow: 0 0 20px rgba(16, 185, 129, 0.4);
+}
+
+.controls button:active {
+    transform: scale(.95);
+}
+
+.tournament-cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.5rem; }
+.t-card {
+    background: linear-gradient(145deg, #0A110F, #040805);
+    border: 1px solid var(--border);
+    border-radius: 12px; 
+    overflow: hidden; 
+    transition: 0.3s;
+}
+.t-card:hover { 
+    transform: translateY(-5px); 
+    border-color: var(--primary);
+    box-shadow: 0 10px 30px rgba(16, 185, 129, 0.2);
+}
+.t-card-img { 
+    height: 160px; 
+    background: #1C1C25; 
+    display: flex; 
+    align-items: center; 
+    justify-content: center;
+    border-bottom: 1px solid var(--border);
+    font-family: 'Rajdhani', sans-serif; 
+    font-size: 1.5rem; 
+    font-weight: 700;
+}
+.valorant { background: linear-gradient(135deg, #FF4655, #1F2326); }
+.freefire { background: linear-gradient(135deg, #FFA800, #1F2326); }
+.bgmi { background: linear-gradient(135deg, #F2A900, #1F2326); }
+
+.t-card-body { padding: 1.3rem; }
+.t-card-body h3 { 
+    font-family: 'Rajdhani', sans-serif; 
+    font-size: 1rem; 
+    margin-bottom: 0.5rem; 
+    letter-spacing: 0.5px;
+}
+.t-card-body p { color: var(--text-dim); font-size: 0.8rem; margin-bottom: 1.2rem; }
+.t-card .btn { width: 100%; padding: 0.75rem; }
+
+.leaderboard {
+    background: var(--bg-card); 
+    border: 1px solid var(--border);
+    border-radius: 12px; 
+    padding: 1.5rem;
+}
+.lb-row {
+    display: flex; 
+    justify-content: space-between; 
+    align-items: center;
+    padding: 1rem 0; 
+    border-bottom: 1px solid var(--border);
+}
+.lb-row:last-child { border-bottom: none; }
+.lb-rank { display: flex; align-items: center; gap: 1rem; }
+.lb-rank span { 
+    color: var(--primary); 
+    font-weight: 700; 
+    width: 20px;
+    font-family: 'Rajdhani', sans-serif;
+}
+.lb-rank i { color: var(--primary); opacity: 0.6; }
+.lb-score { color: var(--text-dim); font-family: 'Rajdhani', sans-serif; font-weight: 600; }
+
+.about-section {
+    padding: 5rem 6%;
+    background: #030504;
+    border-top: 1px solid rgba(16, 185, 129, 0.1);
+    text-align: center;
+    position: relative;
+    z-index: 5;
+}
+
+.about-content h2 {
+    font-family: 'Rajdhani', sans-serif; 
+    font-size: 2.5rem; 
+    margin-bottom: 1.5rem;
+    color: var(--primary);
+    text-shadow: 0 0 20px var(--primary-glow);
+}
+
+.about-content > p {
+    color: var(--text-dim); 
+    font-size: 1.1rem; 
+    line-height: 1.8; 
+    max-width: 700px;
+    margin: 0 auto 3rem;
+}
+
+.about-stats {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 2rem;
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+.stat {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 2rem 1rem;
+}
+
+.stat h3 {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 2.5rem;
+    color: var(--primary);
+    margin-bottom: 0.5rem;
+}
+
+.stat p {
+    color: var(--text-dim);
+    font-size: 0.9rem;
+    letter-spacing: 1px;
+}
+
+/* TABLET */
+@media (max-width: 1200px) {
+    .hero-visual { width: 55%; }
+    .hero h1 { font-size: 4rem; }
+    .samurai-img, .samurai-cutout { opacity: 0.8; }
+}
+
+@media (max-width: 1024px) {
+    .features { grid-template-columns: repeat(2, 1fr); }
+    .content-grid { grid-template-columns: 1fr; }
+    .hero-visual { width: 60%; }
+    .samurai-img, .samurai-cutout { opacity: 0.5; }
+    .carousel {
+        height: 420px;
+    }
+    .card {
+        width: 240px;
+        height: 340px;
+        margin-left: -120px;
+        margin-top: -170px;
+    }
+}
+
+/* MOBILE */
+@media (max-width: 768px) {
+    .hero {
+        min-height: 100vh;
+        padding: 10rem 6% 2rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    
+    .hero-content {
+        max-width: 100%;
+        text-align: center;
+        z-index: 10;
+        position: relative;
+    }
+    
+    .hero h1 { font-size: 2.8rem; }
+    .hero p { max-width: 100%; }
+    .hero-btns { justify-content: center; flex-wrap: wrap; }
+    
+    .hero-visual {
+        position: absolute;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+        z-index: 2;
+    }
+    
+    .samurai-img, .samurai-cutout {
+      image-rendering: -webkit-optimize-contrast;
+      image-rendering: crisp-edges;
+        position: absolute;
+        right: 0;
+        bottom: 0;
+        height: 100%;
+        width: auto;
+        object-fit: contain-fills;
+        object-position: right bottom;
+        opacity: 0.45;
+    }
+    
+    .katana-glow {
+        bottom: 25%;
+        right: 22%;
+        height: 20%;
+        width: 2px;
+        transform: rotate(12deg);
+    }
+    
+    .rain { 
+        opacity:1;
+        z-index: 70;
+    }
+    
+    .hero::before {
+        z-index: 1;
+        right: 0;
+        top: 50%;
+        width: 500px;
+        height: 500px;
+        opacity: 0.6;
+    }
+    
+    .tournament-cards { grid-template-columns: 1fr; }
+    .features { grid-template-columns: 1fr; }
+    
+    .about-stats {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+    }
+    .about-content h2 {
+        font-size: 2rem;
+    }
+    .carousel .card:nth-child(1) { z-index: 4; }
+.carousel .card:nth-child(2) { z-index: 3; }
+.carousel .card:nth-child(3) { z-index: 2; }
+.carousel .card:nth-child(4) { z-index: 1; }
+
+.carousel .card {
+    position: absolute !important;
+    left: 78% !important;
+    top: 95%!important;
+    right:0% ;
+    bottom: 0%;
+}
+    
+    .carousel {
+        height: 390px;
+        perspective: 900px;
+    }
+    .card {
+        width: 180px;
+        height: 250px;
+        margin-left: 100px
+        margin-top: 140px
+    }
+    .game-title {
+        font-size: 1.6rem;
+    }
+    .game-join {
+        padding: 0.7rem!important;
+    }
+}
+.freefire-page{
+    background:
+linear-gradient(
+    rgba(4,8,5,.40),
+    rgba(4,8,5,.60)
+),
+url("freefire.jpg");
+  background-size:cover;
+  background-repeat: no-repeat;
+
+    
+}
+
+.details-box,
+.form-box{
+    max-width: 700px;
+    margin: auto;
+    background: rgba(10,17,15,.85);
+    backdrop-filter: blur(12px);
+    border: 1px solid rgba(16,185,129,.25);
+    border-radius: 16px;
+    padding: 2rem;
+}
+
+.detail-row{
+    display:flex;
+    justify-content:space-between;
+    padding:1rem 0;
+    border-bottom:1px solid rgba(255,255,255,.08);
+}
+
+.detail-row:last-child{
+    border-bottom:none;
+}
+
+.detail-row span:first-child{
+    color:var(--primary);
+    font-weight:600;
+}
+
+.form-input{
+    width:100%;
+    padding:14px;
+    margin-bottom:15px;
+    border-radius:8px;
+    border:1px solid var(--border);
+    background:#0A110F;
+    color:var(--text);
+    font-size:1rem;
+}
+
+.form-input:focus{
+    outline:none;
+    border-color:var(--primary);
+    box-shadow:0 0 15px rgba(16,185,129,.25);
+}
+
+.submit-btn{
+    width:100%;
+    padding:14px;
+}
+
+/* ===================================================
+   MODE SELECTION CARDS
+=================================================== */
+.mode-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.5rem;
+    max-width: 1000px;
+    margin: 0 auto;
+}
+
+.mode-card {
+    position: relative;
+    background: linear-gradient(160deg, rgba(10,17,15,.92), rgba(4,8,5,.96));
+    border: 1px solid rgba(16,185,129,.2);
+    border-radius: 18px;
+    padding: 2.2rem 1.5rem;
+    text-align: center;
+    cursor: pointer;
+    overflow: hidden;
+    transition: transform .35s ease, border-color .35s ease, box-shadow .35s ease;
+}
+
+.mode-card::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(circle at 50% 0%, rgba(16,185,129,.18), transparent 65%);
+    opacity: 0;
+    transition: opacity .35s ease;
+}
+
+.mode-card:hover {
+    transform: translateY(-8px);
+    border-color: var(--primary);
+    box-shadow: 0 20px 50px -10px rgba(16,185,129,.3), 0 0 0 1px rgba(16,185,129,.15);
+}
+
+.mode-card:hover::before { opacity: 1; }
+
+.mode-card .mode-icon {
+    width: 64px;
+    height: 64px;
+    margin: 0 auto 1.2rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    background: rgba(16,185,129,.1);
+    border: 1px solid rgba(16,185,129,.3);
+    filter: drop-shadow(0 0 10px rgba(52,211,153,.4));
+    position: relative;
+    z-index: 1;
+}
+
+.mode-card .mode-icon svg { width: 30px; height: 30px; }
+
+.mode-card h3 {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 1.4rem;
+    font-weight: 700;
+    letter-spacing: 1px;
+    margin-bottom: .5rem;
+    position: relative;
+    z-index: 1;
+}
+
+.mode-card p {
+    color: var(--text-dim);
+    font-size: .88rem;
+    margin-bottom: 1rem;
+    position: relative;
+    z-index: 1;
+}
+
+.mode-card .mode-tag {
+    display: inline-block;
+    font-size: .7rem;
+    font-weight: 700;
+    letter-spacing: 1.5px;
+    color: var(--primary-glow);
+    border: 1px solid rgba(52,211,153,.4);
+    border-radius: 20px;
+    padding: 4px 14px;
+    position: relative;
+    z-index: 1;
+}
+
+/* ===================================================
+   MODAL OVERLAY
+=================================================== */
+.modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(2,5,3,.82);
+    backdrop-filter: blur(6px);
+    z-index: 9000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity .3s ease, visibility .3s ease;
+    padding: 1.5rem;
+}
+
+.modal-overlay.active {
+    opacity: 1;
+    visibility: visible;
+}
+
+.modal-box {
+    background: linear-gradient(160deg, #0A110F, #050A07);
+    border: 1px solid rgba(16,185,129,.3);
+    border-radius: 20px;
+    width: 100%;
+    max-width: 560px;
+    max-height: 88vh;
+    overflow-y: auto;
+    padding: 2rem;
+    position: relative;
+    box-shadow: 0 0 60px rgba(16,185,129,.15);
+    transform: scale(.9) translateY(20px);
+    transition: transform .35s cubic-bezier(.22,.9,.32,1);
+}
+
+.modal-overlay.active .modal-box {
+    transform: scale(1) translateY(0);
+}
+
+.modal-close {
+    position: absolute;
+    top: 1.2rem;
+    right: 1.2rem;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: rgba(16,185,129,.1);
+    border: 1px solid rgba(16,185,129,.3);
+    color: var(--text);
+    font-size: 1.1rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all .2s ease;
+    z-index: 2;
+}
+
+.modal-close:hover {
+    background: var(--primary);
+    color: #04150c;
+    transform: rotate(90deg);
+}
+
+.modal-title {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 1.6rem;
+    font-weight: 700;
+    letter-spacing: 1px;
+    margin-bottom: .3rem;
+    color: var(--text);
+}
+
+.modal-subtitle {
+    color: var(--text-dim);
+    font-size: .85rem;
+    margin-bottom: 1.6rem;
+}
+
+/* Sub-option chips (Solo/Duo/Squad etc.) */
+.suboption-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    gap: .9rem;
+    margin-bottom: .5rem;
+}
+
+.suboption-card {
+    background: rgba(16,185,129,.05);
+    border: 1px solid rgba(16,185,129,.22);
+    border-radius: 12px;
+    padding: 1.2rem .8rem;
+    text-align: center;
+    cursor: pointer;
+    transition: all .25s ease;
+}
+
+.suboption-card:hover,
+.suboption-card.selected {
+    background: rgba(16,185,129,.14);
+    border-color: var(--primary);
+    transform: translateY(-3px);
+    box-shadow: 0 8px 20px -6px rgba(16,185,129,.35);
+}
+
+.suboption-card .sub-icon {
+    font-size: 1.6rem;
+    margin-bottom: .4rem;
+    display: block;
+}
+
+.suboption-card h4 {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 1rem;
+    font-weight: 700;
+    margin-bottom: .2rem;
+}
+
+.suboption-card span {
+    font-size: .72rem;
+    color: var(--text-dim);
+}
+
+/* Custom Room special layout */
+.custom-teams {
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 1rem;
+}
+
+.team-slot {
+    background: rgba(16,185,129,.06);
+    border: 1px solid rgba(16,185,129,.25);
+    border-radius: 14px;
+    padding: 1.4rem 1rem;
+    text-align: center;
+}
+
+.team-slot h4 {
+    font-family: 'Rajdhani', sans-serif;
+    font-weight: 700;
+    color: var(--primary-glow);
+    margin-bottom: .3rem;
+}
+
+.team-slot span { font-size: .75rem; color: var(--text-dim); }
+
+.vs-divider {
+    font-family: 'Rajdhani', sans-serif;
+    font-weight: 700;
+    font-size: 1.3rem;
+    color: var(--primary);
+    text-shadow: 0 0 12px rgba(52,211,153,.6);
+}
+
+/* Dynamic registration form (inside modal) */
+.dyn-form-wrap { display: none; }
+.dyn-form-wrap.active { display: block; animation: fadeSlideUp .4s ease; }
+
+@keyframes fadeSlideUp {
+    from { opacity: 0; transform: translateY(14px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.dyn-field-group {
+    display: grid;
+    gap: .7rem;
+    margin-bottom: .6rem;
+}
+
+.back-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    color: var(--primary-glow);
+    font-size: .82rem;
+    font-weight: 600;
+    cursor: pointer;
+    margin-bottom: 1rem;
+    background: none;
+    border: none;
+}
+.back-link:hover { text-decoration: underline; }
+
+/* ===================================================
+   LIVE TOURNAMENT SUMMARY CARD
+=================================================== */
+.summary-card {
+    background: rgba(16,185,129,.07);
+    border: 1px dashed rgba(16,185,129,.35);
+    border-radius: 14px;
+    padding: 1.2rem 1.4rem;
+    margin-bottom: 1.4rem;
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: .8rem;
+}
+
+.summary-item { text-align: center; }
+.summary-item .summary-label {
+    font-size: .65rem;
+    letter-spacing: 1px;
+    color: var(--text-dim);
+    text-transform: uppercase;
+    margin-bottom: 4px;
+}
+.summary-item .summary-value {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: var(--primary-glow);
+}
+
+@media (max-width: 560px) {
+    .summary-card { grid-template-columns: repeat(2, 1fr); }
+}
+
+/* ===================================================
+   IMAGE-STYLE DETAIL & REWARD CARDS
+=================================================== */
+.info-card-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.4rem;
+    max-width: 1000px;
+    margin: 0 auto;
+}
+
+.info-card {
+    position: relative;
+    border-radius: 16px;
+    overflow: hidden;
+    border: 1px solid rgba(16,185,129,.18);
+    background: linear-gradient(160deg, rgba(10,17,15,.9), rgba(4,8,5,.95));
+    padding: 1.6rem 1.3rem;
+    transition: transform .35s ease, border-color .35s ease, box-shadow .35s ease;
+}
+
+.info-card::after {
+    content: '';
+    position: absolute;
+    top: -40%;
+    left: -10%;
+    width: 60%;
+    height: 180%;
+    background: linear-gradient(120deg, transparent, rgba(52,211,153,.12), transparent);
+    transform: rotate(20deg) translateX(-120%);
+    transition: transform .8s ease;
+}
+
+.info-card:hover::after { transform: rotate(20deg) translateX(120%); }
+
+.info-card:hover {
+    transform: translateY(-6px);
+    border-color: rgba(16,185,129,.5);
+    box-shadow: 0 16px 40px -12px rgba(16,185,129,.3);
+}
+
+.info-card .info-icon {
+    width: 46px;
+    height: 46px;
+    border-radius: 12px;
+    background: rgba(16,185,129,.12);
+    border: 1px solid rgba(16,185,129,.3);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 1rem;
+    filter: drop-shadow(0 0 8px rgba(52,211,153,.4));
+}
+
+.info-card .info-icon svg { width: 22px; height: 22px; }
+
+.info-card h4 {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 1.1rem;
+    font-weight: 700;
+    margin-bottom: .3rem;
+}
+
+.info-card p {
+    color: var(--text-dim);
+    font-size: .85rem;
+    line-height: 1.4;
+}
+
+.info-card .info-value {
+    color: var(--primary-glow);
+    font-weight: 700;
+    font-size: 1.3rem;
+    font-family: 'Rajdhani', sans-serif;
+}
+
+/* ===================================================
+   COUNTDOWN TIMER
+=================================================== */
+.countdown-wrap {
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+    margin: 1.6rem auto 0;
+    flex-wrap: wrap;
+}
+
+.countdown-unit {
+    background: rgba(16,185,129,.08);
+    border: 1px solid rgba(16,185,129,.3);
+    border-radius: 12px;
+    padding: .9rem 1.1rem;
+    text-align: center;
+    min-width: 76px;
+}
+
+.countdown-unit .cd-num {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: var(--primary-glow);
+    text-shadow: 0 0 14px rgba(52,211,153,.5);
+    line-height: 1;
+}
+
+.countdown-unit .cd-label {
+    font-size: .65rem;
+    letter-spacing: 1px;
+    color: var(--text-dim);
+    text-transform: uppercase;
+    margin-top: 4px;
+}
+
+/* ===================================================
+   SUCCESS POPUP
+=================================================== */
+.success-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(2,5,3,.85);
+    backdrop-filter: blur(6px);
+    z-index: 9500;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity .3s ease, visibility .3s ease;
+    padding: 1.5rem;
+}
+
+.success-overlay.active { opacity: 1; visibility: visible; }
+
+.success-box {
+    background: linear-gradient(160deg, #0A110F, #050A07);
+    border: 1px solid var(--primary);
+    border-radius: 20px;
+    max-width: 420px;
+    width: 100%;
+    padding: 2.4rem 2rem;
+    text-align: center;
+    box-shadow: 0 0 80px rgba(16,185,129,.35);
+    transform: scale(.85);
+    transition: transform .4s cubic-bezier(.22,.9,.32,1);
+}
+
+.success-overlay.active .success-box { transform: scale(1); }
+
+.success-checkmark {
+    width: 76px;
+    height: 76px;
+    margin: 0 auto 1.2rem;
+    border-radius: 50%;
+    background: rgba(16,185,129,.12);
+    border: 2px solid var(--primary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    filter: drop-shadow(0 0 16px rgba(52,211,153,.6));
+}
+
+.success-checkmark svg {
+    width: 36px;
+    height: 36px;
+    stroke: var(--primary-glow);
+}
+
+.success-box h3 {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 1.5rem;
+    font-weight: 700;
+    margin-bottom: .5rem;
+}
+
+.success-box p {
+    color: var(--text-dim);
+    font-size: .9rem;
+    margin-bottom: 1.2rem;
+}
+
+.tournament-id-box {
+    background: rgba(16,185,129,.08);
+    border: 1px dashed rgba(16,185,129,.4);
+    border-radius: 10px;
+    padding: .9rem;
+    margin-bottom: 1.4rem;
+}
+
+.tournament-id-box .tid-label {
+    font-size: .65rem;
+    letter-spacing: 1px;
+    color: var(--text-dim);
+    text-transform: uppercase;
+    margin-bottom: 4px;
+}
+
+.tournament-id-box .tid-value {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 1.3rem;
+    font-weight: 700;
+    color: var(--primary-glow);
+    letter-spacing: 2px;
+}
+
+/* Responsive */
+@media (max-width: 820px) {
+    .mode-grid { grid-template-columns: 1fr; }
+    .info-card-grid { grid-template-columns: 1fr; }
+    .summary-card { grid-template-columns: repeat(2,1fr); }
+    .custom-teams { grid-template-columns: 1fr; }
+    .vs-divider { transform: rotate(90deg); margin: -0.2rem auto; }
+}
+
+/* ===== KATANA SWORD CURSOR ===== */
+* { cursor: none !important; }
+
+.sword-cursor {
+    width: 30px;
+    height: 30px;
+    position: fixed;
+    top: 0;
+    left: 0;
+    pointer-events: none;
+    z-index: 99999;
+    transform: translate(-50%, -50%) rotate(-45deg);
+    filter: drop-shadow(0 0 6px var(--primary-glow)) drop-shadow(0 0 14px var(--primary));
+    transition: transform 0.08s linear;
+}
+
+.sword-ring {
+    width: 30px;
+    height: 30px;
+    border: 1px solid var(--primary);
+    border-radius: 50%;
+    position: fixed;
+    top: 0;
+    left: 0;
+    pointer-events: none;
+    z-index: 99998;
+    transform: translate(-50%, -50%);
+    opacity: 0.4;
+}
+
+.slash-trail-canvas {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 99997;
+    width: 100vw;
+    height: 100vh;
+}
+
+/* ===== SCROLL REVEAL ===== */
+.reveal {
+    opacity: 0;
+    transform: translateY(40px);
+    transition: opacity 0.8s ease, transform 0.8s ease;
+}
+.reveal.visible {
+    opacity: 1;
+    transform: translateY(0);
+}
+.reveal-delay-1.visible { transition-delay: 0.1s; }
+.reveal-delay-2.visible { transition-delay: 0.2s; }
+.reveal-delay-3.visible { transition-delay: 0.3s; }
+.reveal-delay-4.visible { transition-delay: 0.4s; }
+
+/* ===== LOADING SCREEN ===== */
+.loader {
+    position: fixed;
+    inset: 0;
+    background: var(--bg);
+    z-index: 999999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: opacity 0.6s ease, visibility 0.6s ease;
+}
+.loader.hidden {
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+}
+.loader-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 18px;
+}
+.loader-katana {
+    filter: drop-shadow(0 0 10px var(--primary-glow)) drop-shadow(0 0 24px var(--primary));
+}
+.loader-blade {
+    stroke-dasharray: 170;
+    stroke-dashoffset: 170;
+    animation: drawBlade 1.1s ease forwards infinite alternate;
+}
+@keyframes drawBlade {
+    0% { stroke-dashoffset: 170; }
+    100% { stroke-dashoffset: 0; }
+}
+.loader-text {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 1.6rem;
+    font-weight: 700;
+    letter-spacing: 6px;
+    color: var(--text);
+    text-shadow: 0 0 16px var(--primary-glow);
+}
+.loader-bar {
+    width: 180px;
+    height: 3px;
+    background: rgba(16,185,129,0.15);
+    border-radius: 2px;
+    overflow: hidden;
+}
+.loader-bar-fill {
+    width: 0%;
+    height: 100%;
+    background: linear-gradient(90deg, var(--primary-dark), var(--primary-glow));
+    box-shadow: 0 0 10px var(--primary-glow);
+    animation: loaderFill 1.4s ease forwards;
+}
+@keyframes loaderFill {
+    0% { width: 0%; }
+    100% { width: 100%; }
+}
+
+/* ===== GLITCH TEXT (hero title) ===== */
+.glitch-title {
+    position: relative;
+}
+.glitch-title.glitching::before,
+.glitch-title.glitching::after {
+    content: attr(data-text);
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    white-space: pre;
+}
+.glitch-title.glitching::before {
+    color: #ff2d55;
+    z-index: -1;
+    animation: glitchShiftRed 0.4s steps(2, end) 3;
+    mix-blend-mode: screen;
+}
+.glitch-title.glitching::after {
+    color: #00eaff;
+    z-index: -1;
+    animation: glitchShiftBlue 0.4s steps(2, end) 3;
+    mix-blend-mode: screen;
+}
+@keyframes glitchShiftRed {
+    0% { transform: translate(0,0); clip-path: inset(0 0 80% 0); }
+    20% { transform: translate(-4px,2px); clip-path: inset(20% 0 50% 0); }
+    40% { transform: translate(3px,-2px); clip-path: inset(60% 0 10% 0); }
+    60% { transform: translate(-2px,1px); clip-path: inset(10% 0 70% 0); }
+    80% { transform: translate(2px,-1px); clip-path: inset(40% 0 30% 0); }
+    100% { transform: translate(0,0); clip-path: inset(0 0 100% 0); }
+}
+@keyframes glitchShiftBlue {
+    0% { transform: translate(0,0); clip-path: inset(70% 0 0 0); }
+    20% { transform: translate(4px,-2px); clip-path: inset(30% 0 40% 0); }
+    40% { transform: translate(-3px,2px); clip-path: inset(5% 0 80% 0); }
+    60% { transform: translate(2px,-1px); clip-path: inset(50% 0 20% 0); }
+    80% { transform: translate(-2px,1px); clip-path: inset(15% 0 60% 0); }
+    100% { transform: translate(0,0); clip-path: inset(100% 0 0 0); }
+}
+
+/* ===== NEON FLICKER (logo) ===== */
+.logo-icon.flicker {
+    animation: neonFlicker 0.15s steps(1) 1;
+}
+@keyframes neonFlicker {
+    0%, 100% { opacity: 1; filter: drop-shadow(0 0 10px var(--primary-glow)); }
+    30% { opacity: 0.3; filter: drop-shadow(0 0 2px var(--primary-glow)); }
+    50% { opacity: 1; filter: drop-shadow(0 0 14px var(--primary-glow)); }
+    70% { opacity: 0.4; filter: drop-shadow(0 0 3px var(--primary-glow)); }
+}
+
+/* ===== KATANA SECTION DIVIDER ===== */
+.katana-divider {
+    position: relative;
+    width: 100%;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+}
+.katana-divider svg {
+    width: 100%;
+    max-width: 900px;
+    height: 100%;
+}
+.katana-divider-line {
+    stroke: var(--primary);
+    stroke-width: 2;
+    filter: drop-shadow(0 0 6px var(--primary-glow));
+    stroke-dasharray: 1000;
+    stroke-dashoffset: 1000;
+    transition: stroke-dashoffset 1s ease;
+}
+.katana-divider.visible .katana-divider-line {
+    stroke-dashoffset: 0;
+}
+.katana-divider-tip {
+    opacity: 0;
+    transition: opacity 0.3s ease 0.9s;
+}
+.katana-divider.visible .katana-divider-tip {
+    opacity: 1;
+}
+
+/* ===== ATMOSPHERE: FLOATING EMBERS ===== */
+.embers {
+    position: absolute;
+    inset: 0;
+    overflow: hidden;
+    pointer-events: none;
+    z-index: 3;
+}
+.ember {
+    position: absolute;
+    bottom: -20px;
+    width: 4px;
+    height: 4px;
+    border-radius: 50%;
+    background: var(--primary-glow);
+    box-shadow: 0 0 8px 2px rgba(52,211,153,0.7);
+    opacity: 0;
+    animation: emberRise linear infinite;
+}
+@keyframes emberRise {
+    0% {
+        transform: translateY(0) translateX(0) scale(0.6);
+        opacity: 0;
+    }
+    10% {
+        opacity: 0.9;
+    }
+    50% {
+        transform: translateY(-50vh) translateX(var(--drift, 20px)) scale(1);
+    }
+    90% {
+        opacity: 0.5;
+    }
+    100% {
+        transform: translateY(-100vh) translateX(calc(var(--drift, 20px) * 2)) scale(0.3);
+        opacity: 0;
+    }
+}
+
+@media(max-width:768px){
+
+    .details-box,
+    .form-box{
+        padding:1.2rem;
+    }
+
+    .detail-row{
+        font-size:.9rem;
+    }
+
+    .freefire-page{
+        background-position:50% center;
+    }
+}
+
+/* ===== SCROLL REVEAL ===== */
+.reveal {
+    opacity: 0;
+    transform: translateY(40px);
+    transition: opacity 0.8s ease, transform 0.8s ease;
+}
+.reveal.visible {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+/* ===== LAPTOP TEXT FIX (1024px+) ===== */
+@media (min-width: 1024px) {
+    /* Increase text sizes only on laptop */
+    body { font-size: 17px; }
+    
+    /* Paragraphs and body text */
+    p { font-size: 1.1rem; line-height: 1.7; }
+    
+    /* Section headings */
+    h1 { font-size: 3.2rem; }
+    h2 { font-size: 2.4rem; }
+    h3 { font-size: 1.6rem; }
+    h4 { font-size: 1.3rem; }
+    
+    /* Specific elements */
+    .hero h1 { font-size: 5.5rem !important; }
+    .section-header h2 { font-size: 2.8rem !important; }
+    .feature h3 { font-size: 1.5rem !important; }
+    .feature p { font-size: 1.1rem !important; }
+    .tournament-detail h4 { font-size: 1.25rem !important; }
+    .tournament-detail p { font-size: 1rem !important; }
+    .modal-content h2 { font-size: 2.2rem !important; }
+    .modal-content p { font-size: 1.05rem !important; }
+    .btn { font-size: 1.05rem !important; }
+}
+
+@media (min-width: 1440px) {
+    body { font-size: 18px; }
+    h1 { font-size: 3.5rem; }
+    h2 { font-size: 2.6rem; }
+    h3 { font-size: 1.8rem; }
+    .hero h1 { font-size: 5.8rem !important; }
+    .section-header h2 { font-size: 3rem !important; }
+    .modal-content h2 { font-size: 2.4rem !important; }
+}
+
+@media (min-width: 1920px) {
+    body { font-size: 19px; }
+    .hero h1 { font-size: 6.2rem !important; }
+    .modal-content h2 { font-size: 2.6rem !important; }
+}
+</style>
+</head>
+
+<body>
+<div class="loader" id="loader">
+    <div class="loader-content">
+        <svg class="loader-katana" viewBox="0 0 200 200" width="90" height="90">
+            <line x1="40" y1="160" x2="160" y2="40" stroke="#10B981" stroke-width="6" stroke-linecap="round" class="loader-blade"/>
+            <line x1="40" y1="160" x2="55" y2="160" stroke="#34D399" stroke-width="9" stroke-linecap="round"/>
+            <circle cx="160" cy="40" r="5" fill="#34D399"/>
+        </svg>
+        <div class="loader-text">STRIKE</div>
+        <div class="loader-bar"><div class="loader-bar-fill"></div></div>
+    </div>
+</div>
+
+
+<!-- LIGHTNING -->
+<div class="bolt-overlay">
+    <svg viewBox="0 0 100 600">
+        <path class="bolt-line"
+        d="M50 0 L30 120 L60 120 L40 250 L70 250 L45 400 L60 400 L50 600"/>
+    </svg>
+</div>
+
+<!-- NAVBAR -->
+<nav>
+
+    <div class="nav-top">
+
+        <div class="logo">
+            <div class="logo-icon" id="logoIcon"></div>
+            STRIKE ESPORTS
+        </div>
+
+        <div class="nav-btns">
+            <a href="index.html">
+                <button class="btn btn-outline">BACK</button>
+            </a>
+        </div>
+
+    </div>
+
+</nav>
+
+<!-- HERO -->
+<section class="hero freefire-page">
+
+    <div class="rain">
+        <div class="layer3"></div>
+    </div>
+
+    <div class="hero-content">
+
+        <div class="hero-tag">
+            FREE FIRE TOURNAMENT
+        </div>
+
+        <h1 class="glitch-title" data-text="FREE FIRE">FREE FIRE</h1>
+
+        <p>
+            Enter the battlefield, compete against skilled squads,
+            and claim victory in our community tournament.
+            Join now and prove your dominance.
+        </p>
+
+        <div class="hero-btns">
+            <a href="#register">
+                <button class="btn btn-primary">
+                    REGISTER NOW
+                </button>
+            </a>
+        </div>
+
+    </div>
+
+    <div class="embers" id="embers"></div>
+
+</section>
+
+<div class="katana-divider">
+    <svg viewBox="0 0 900 40" preserveAspectRatio="none">
+        <line x1="20" y1="20" x2="880" y2="20" class="katana-divider-line"/>
+        <circle cx="880" cy="20" r="4" fill="#34D399" class="katana-divider-tip"/>
+    </svg>
+</div>
+
+<!-- TOURNAMENT DETAILS (image-style cards) -->
+<section class="section">
+
+    <div class="section-header">
+        <h2>TOURNAMENT DETAILS</h2>
+    </div>
+
+    <div class="info-card-grid reveal">
+
+        <div class="info-card">
+            <div class="info-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
+            </div>
+            <h4>Prize Pool</h4>
+            <div class="info-value">₹500</div>
+            <p>Split across top performing solo players, duos and squads.</p>
+        </div>
+
+        <div class="info-card">
+            <div class="info-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+            </div>
+            <h4>Match Date</h4>
+            <div class="info-value">25 JUN</div>
+            <p>Lobby opens 30 minutes before the scheduled match time.</p>
+        </div>
+
+        <div class="info-card">
+            <div class="info-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+            </div>
+            <h4>Entry Fee</h4>
+            <div class="info-value">FREE</div>
+            <p>Zero entry cost. Just register and show up ready to play.</p>
+        </div>
+
+        <div class="info-card">
+            <div class="info-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
+            </div>
+            <h4>Map</h4>
+            <div class="info-value">Bermuda</div>
+            <p>Classic battleground. More maps unlocked in later rounds.</p>
+        </div>
+
+        <div class="info-card">
+            <div class="info-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="7" r="4"/><path d="M2 21v-2a4 4 0 0 1 4-4h6a4 4 0 0 1 4 4v2"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/><path d="M21 21v-2a4 4 0 0 0-3-3.85"/></svg>
+            </div>
+            <h4>Slots</h4>
+            <div class="info-value">25 Teams</div>
+            <p>Limited slots per mode. First come, first served basis.</p>
+        </div>
+
+        <div class="info-card">
+            <div class="info-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+            </div>
+            <h4>Anti-Cheat</h4>
+            <div class="info-value">SECURE</div>
+            <p>Monitored matches with zero tolerance for hacking or teaming.</p>
+        </div>
+
+    </div>
+
+    <div class="countdown-wrap reveal" id="countdownWrap">
+        <div class="countdown-unit"><div class="cd-num" id="cdDays">00</div><div class="cd-label">Days</div></div>
+        <div class="countdown-unit"><div class="cd-num" id="cdHours">00</div><div class="cd-label">Hours</div></div>
+        <div class="countdown-unit"><div class="cd-num" id="cdMins">00</div><div class="cd-label">Mins</div></div>
+        <div class="countdown-unit"><div class="cd-num" id="cdSecs">00</div><div class="cd-label">Secs</div></div>
+    </div>
+
+</section>
+
+<!-- MODE SELECTION -->
+<section class="section" id="modes">
+
+    <div class="section-header">
+        <h2>CHOOSE YOUR MODE</h2>
+    </div>
+
+    <div class="mode-grid reveal">
+
+        <div class="mode-card" data-mode="br">
+            <div class="mode-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="#34D399" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
+            </div>
+            <h3>BATTLE ROYALE</h3>
+            <p>Drop in, loot fast, survive the storm.</p>
+            <span class="mode-tag">SOLO · DUO · SQUAD</span>
+        </div>
+
+        <div class="mode-card" data-mode="cs">
+            <div class="mode-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="#34D399" stroke-width="2"><path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z"/><circle cx="12" cy="13" r="3"/></svg>
+            </div>
+            <h3>CLASH SQUAD</h3>
+            <p>Fast-paced 4v4 gunfight rounds.</p>
+            <span class="mode-tag">SOLO · SQUAD</span>
+        </div>
+
+        <div class="mode-card" data-mode="custom">
+            <div class="mode-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="#34D399" stroke-width="2"><circle cx="9" cy="7" r="4"/><path d="M2 21v-2a4 4 0 0 1 4-4h6a4 4 0 0 1 4 4v2"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/><path d="M21 21v-2a4 4 0 0 0-3-3.85"/></svg>
+            </div>
+            <h3>CUSTOM ROOM</h3>
+            <p>Bring your own squads, we host the room.</p>
+            <span class="mode-tag">TEAM A VS TEAM B</span>
+        </div>
+
+    </div>
+
+</section>
+
+<!-- ========== MODE MODAL ========== -->
+<div class="modal-overlay" id="modeModal">
+    <div class="modal-box">
+        <button class="modal-close" id="modalCloseBtn">✕</button>
+
+        <!-- STEP 1: sub-option chooser -->
+        <div id="modalStepChoose">
+            <div class="modal-title" id="modalTitle">Select Format</div>
+            <div class="modal-subtitle" id="modalSubtitle">Choose how you want to compete</div>
+            <div class="suboption-grid" id="suboptionGrid"></div>
+
+            <!-- Custom room special layout (hidden unless custom mode) -->
+            <div id="customTeamsLayout" style="display:none; margin-top:1rem;">
+                <div class="custom-teams">
+                    <div class="team-slot">
+                        <h4>TEAM A</h4>
+                        <span>4 Players</span>
+                    </div>
+                    <div class="vs-divider">VS</div>
+                    <div class="team-slot">
+                        <h4>TEAM B</h4>
+                        <span>4 Players</span>
+                    </div>
+                </div>
+                <button class="btn btn-primary submit-btn" id="customContinueBtn" type="button">CONTINUE TO REGISTRATION</button>
+            </div>
+        </div>
+
+        <!-- STEP 2: dynamic registration form -->
+        <div class="dyn-form-wrap" id="modalStepForm">
+            <button class="back-link" id="backToChoose">← Back</button>
+
+            <div class="modal-title" id="formTitle">Register</div>
+            <div class="modal-subtitle" id="formSubtitle"></div>
+
+            <div class="summary-card" id="summaryCard">
+                <div class="summary-item">
+                    <div class="summary-label">Mode</div>
+                    <div class="summary-value" id="sumMode">—</div>
+                </div>
+                <div class="summary-item">
+                    <div class="summary-label">Prize Pool</div>
+                    <div class="summary-value">₹500</div>
+                </div>
+                <div class="summary-item">
+                    <div class="summary-label">Entry Fee</div>
+                    <div class="summary-value">FREE</div>
+                </div>
+                <div class="summary-item">
+                    <div class="summary-label">Slots Left</div>
+                    <div class="summary-value" id="sumSlots">18</div>
+                </div>
+            </div>
+
+            <form id="registrationForm">
+                <div class="dyn-field-group" id="dynFieldGroup"></div>
+                <button type="submit" class="btn btn-primary submit-btn">CONFIRM REGISTRATION</button>
+            </form>
+        </div>
+
+    </div>
+</div>
+
+<!-- ========== SUCCESS POPUP ========== -->
+<div class="success-overlay" id="successOverlay">
+    <div class="success-box">
+        <div class="success-checkmark">
+            <svg viewBox="0 0 24 24" fill="none" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+        </div>
+        <h3>Registration Successful!</h3>
+        <p>You're locked in. Check your email for match details and lobby info closer to the date.</p>
+        <div class="tournament-id-box">
+            <div class="tid-label">Your Tournament ID</div>
+            <div class="tid-value" id="tournamentIdValue">SF-000000</div>
+        </div>
+        <button class="btn btn-primary submit-btn" id="successCloseBtn" type="button">DONE</button>
+    </div>
+</div>
+
+<!-- REGISTRATION -->
+<section class="section" id="register">
+
+    <div class="section-header">
+        <h2>REGISTER NOW</h2>
+    </div>
+
+    <div class="form-box reveal" style="text-align:center;">
+        <p style="color:var(--text-dim); margin-bottom:1.4rem;">
+            Pick a mode above to open the registration form, or jump straight in below.
+        </p>
+        <button class="btn btn-primary" id="quickRegisterBtn" type="button">CHOOSE MODE & REGISTER</button>
+    </div>
+
+</section>
+
+<div class="katana-divider">
+    <svg viewBox="0 0 900 40" preserveAspectRatio="none">
+        <line x1="20" y1="20" x2="880" y2="20" class="katana-divider-line"/>
+        <circle cx="880" cy="20" r="4" fill="#34D399" class="katana-divider-tip"/>
+    </svg>
+</div>
+
+<!-- ABOUT -->
+<section class="about-section">
+
+    <div class="about-content reveal">
+
+        <h2>WHY JOIN?</h2>
+
+        <p>
+            Challenge top players, improve your skills,
+            earn rewards, and become part of the Strike
+            Esports community.
+        </p>
+
+        <div class="about-stats">
+
+            <div class="stat reveal">
+                <h3>500+</h3>
+                <p>PLAYERS</p>
+            </div>
+
+            <div class="stat reveal reveal-delay-1">
+                <h3>50+</h3>
+                <p>MATCHES</p>
+            </div>
+
+            <div class="stat reveal reveal-delay-2">
+                <h3>₹10K+</h3>
+                <p>PRIZES</p>
+            </div>
+
+        </div>
+
+    </div>
+
+</section>
+
+<!-- BUY ME A COFFEE SECTION -->
+<section style="padding: 4rem 6%; background: linear-gradient(160deg, rgba(10,17,15,.95), rgba(4,8,5,.98)); border-top: 2px solid rgba(16,185,129,0.3); border-bottom: 2px solid rgba(16,185,129,0.3);">
+    <div style="max-width: 900px; margin: 0 auto; text-align: center;">
+        <h2 style="font-size: 2.2rem; color: var(--primary-glow); letter-spacing: 2px; margin-bottom: 1.5rem; font-family: 'Rajdhani', sans-serif; text-shadow: 0 0 20px rgba(52,211,153,0.3);">SUPPORT STRIKE ESPORTS</h2>
+        
+        <p style="color: var(--text-dim); font-size: 1.05rem; line-height: 1.7; margin-bottom: 2rem; max-width: 700px; margin-left: auto; margin-right: auto;">
+            Love Strike Esports? Support us by buying us a coffee! Your contribution helps us host better tournaments, improve our platform, and create more exciting esports experiences for the community.
+        </p>
+        
+        <a href="https://www.buymeacoffee.com/strikeesports" target="_blank" style="display: inline-block; background: linear-gradient(135deg, #FF813F, #FF6B35); color: white; padding: 14px 40px; border-radius: 50px; text-decoration: none; font-weight: 700; font-size: 1.05rem; letter-spacing: 1px; box-shadow: 0 10px 30px rgba(255, 107, 53, 0.4); transition: all 0.3s ease; font-family: 'Rajdhani', sans-serif; border: 2px solid transparent; cursor: pointer;">
+            ☕ BUY ME A COFFEE
+        </a>
+    </div>
+</section>
+
+
+<script>
+
+const bolt = document.querySelector('.bolt-overlay');
+
+function lightningStrike(){
+
+    bolt.classList.add('strike');
+    document.body.classList.add('flash');
+
+    setTimeout(() => {
+
+        bolt.classList.remove('strike');
+        document.body.classList.remove('flash');
+
+    },450);
+
+}
+
+setInterval(() => {
+
+    if(Math.random() > 0.5){
+
+        lightningStrike();
+
+    }
+
+},6000);
+
+
+// ===== SCROLL REVEAL OBSERVER =====
+(function () {
+  const revealEls = document.querySelectorAll('.reveal');
+  const obs = new IntersectionObserver((entries) => {
+    entries.forEach((entry) => {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('visible');
+      }
+    });
+  }, { threshold: 0.15, rootMargin: '0px 0px -50px 0px' });
+  revealEls.forEach((el) => obs.observe(el));
+})();
+
+// ===== LOADING SCREEN =====
+(function () {
+  const loader = document.getElementById('loader');
+  if (!loader) return;
+  window.addEventListener('load', () => {
+    setTimeout(() => {
+      loader.classList.add('hidden');
+    }, 600);
+  });
+  setTimeout(() => loader.classList.add('hidden'), 3000);
+})();
+
+// ===== ATMOSPHERE: FLOATING EMBERS =====
+(function () {
+  const container = document.getElementById('embers');
+  if (!container) return;
+  const count = 30;
+  for (let i = 0; i < count; i++) {
+    const ember = document.createElement('div');
+    ember.className = 'ember';
+    const size = 2 + Math.random() * 4;
+    ember.style.width = size + 'px';
+    ember.style.height = size + 'px';
+    ember.style.left = Math.random() * 100 + '%';
+    ember.style.setProperty('--drift', (Math.random() * 60 - 30) + 'px');
+    const duration = 6 + Math.random() * 8;
+    ember.style.animationDuration = duration + 's';
+    ember.style.animationDelay = (Math.random() * duration) + 's';
+    container.appendChild(ember);
+  }
+})();
+
+// ===================================================
+// FREE FIRE TOURNAMENT FLOW: MODES, MODAL, FORM, COUNTDOWN, SUCCESS
+// ===================================================
+(function () {
+  const modeModal = document.getElementById('modeModal');
+  const modalCloseBtn = document.getElementById('modalCloseBtn');
+  const modalStepChoose = document.getElementById('modalStepChoose');
+  const modalStepForm = document.getElementById('modalStepForm');
+  const modalTitle = document.getElementById('modalTitle');
+  const modalSubtitle = document.getElementById('modalSubtitle');
+  const suboptionGrid = document.getElementById('suboptionGrid');
+  const customTeamsLayout = document.getElementById('customTeamsLayout');
+  const customContinueBtn = document.getElementById('customContinueBtn');
+  const backToChoose = document.getElementById('backToChoose');
+  const formTitle = document.getElementById('formTitle');
+  const formSubtitle = document.getElementById('formSubtitle');
+  const sumMode = document.getElementById('sumMode');
+  const sumSlots = document.getElementById('sumSlots');
+  const dynFieldGroup = document.getElementById('dynFieldGroup');
+  const registrationForm = document.getElementById('registrationForm');
+  const successOverlay = document.getElementById('successOverlay');
+  const successCloseBtn = document.getElementById('successCloseBtn');
+  const tournamentIdValue = document.getElementById('tournamentIdValue');
+  const quickRegisterBtn = document.getElementById('quickRegisterBtn');
+
+  if (!modeModal) return;
+
+  const MODE_CONFIG = {
+    br: {
+      name: 'Battle Royale',
+      subtitle: 'Choose your squad size for Battle Royale',
+      options: [
+        { key: 'solo', icon: '🎯', title: 'Solo', sub: '1 Player', uidCount: 1 },
+        { key: 'duo', icon: '🤝', title: 'Duo', sub: '2 Players', uidCount: 2 },
+        { key: 'squad', icon: '👥', title: 'Squad', sub: '4 Players', uidCount: 4 },
+      ],
+    },
+    cs: {
+      name: 'Clash Squad',
+      subtitle: 'Choose your format for Clash Squad',
+      options: [
+        { key: 'solo', icon: '🎯', title: 'Solo', sub: '1 Player', uidCount: 1 },
+        { key: 'squad', icon: '👥', title: 'Squad', sub: '4 Players', uidCount: 4 },
+      ],
+    },
+    custom: {
+      name: 'Custom Room',
+      subtitle: 'Set up Team A vs Team B',
+      isCustom: true,
+      uidCount: 4,
+    },
+  };
+
+  let currentMode = null;
+  let currentSub = null;
+  let currentUidCount = 1;
+
+  function openModal() {
+    modeModal.classList.add('active');
+    document.body.style.overflow = 'hidden';
+  }
+  function closeModal() {
+    modeModal.classList.remove('active');
+    document.body.style.overflow = '';
+    showChooseStep();
+  }
+  function showChooseStep() {
+    modalStepChoose.style.display = 'block';
+    modalStepForm.classList.remove('active');
+  }
+  function showFormStep() {
+    modalStepChoose.style.display = 'none';
+    modalStepForm.classList.add('active');
+  }
+
+  modalCloseBtn.addEventListener('click', closeModal);
+  modeModal.addEventListener('click', (e) => {
+    if (e.target === modeModal) closeModal();
+  });
+  backToChoose.addEventListener('click', showChooseStep);
+
+  // Mode card click -> open modal with relevant sub-options
+  document.querySelectorAll('.mode-card').forEach((card) => {
+    card.addEventListener('click', () => {
+      const modeKey = card.getAttribute('data-mode');
+      currentMode = modeKey;
+      const cfg = MODE_CONFIG[modeKey];
+
+      modalTitle.textContent = cfg.name;
+      modalSubtitle.textContent = cfg.subtitle;
+      suboptionGrid.innerHTML = '';
+
+      if (cfg.isCustom) {
+        suboptionGrid.style.display = 'none';
+        customTeamsLayout.style.display = 'block';
+      } else {
+        suboptionGrid.style.display = 'grid';
+        customTeamsLayout.style.display = 'none';
+
+        cfg.options.forEach((opt) => {
+          const el = document.createElement('div');
+          el.className = 'suboption-card';
+          el.innerHTML = `
+            <span class="sub-icon">${opt.icon}</span>
+            <h4>${opt.title}</h4>
+            <span>${opt.sub}</span>
+          `;
+          el.addEventListener('click', () => {
+            currentSub = opt.key;
+            currentUidCount = opt.uidCount;
+            buildDynamicForm(cfg.name, opt.title, opt.uidCount, false);
+            showFormStep();
+          });
+          suboptionGrid.appendChild(el);
+        });
+      }
+
+      showChooseStep();
+      openModal();
+    });
+  });
+
+  customContinueBtn.addEventListener('click', () => {
+    currentSub = 'custom';
+    currentUidCount = 4;
+    buildDynamicForm('Custom Room', 'Team A vs Team B', 4, true);
+    showFormStep();
+  });
+
+  quickRegisterBtn && quickRegisterBtn.addEventListener('click', () => {
+    document.getElementById('modes').scrollIntoView({ behavior: 'smooth' });
+  });
+
+  function buildDynamicForm(modeName, subLabel, uidCount, isCustom) {
+    formTitle.textContent = `${modeName} — ${subLabel}`;
+    formSubtitle.textContent = isCustom
+      ? 'Fill in both teams to lock your custom room.'
+      : 'Fill your details to confirm your registration.';
+    sumMode.textContent = subLabel;
+    sumSlots.textContent = Math.max(2, Math.floor(Math.random() * 22) + 2);
+
+    dynFieldGroup.innerHTML = '';
+
+    function addInput(type, placeholder, required = true) {
+      const input = document.createElement('input');
+      input.type = type;
+      input.className = 'form-input';
+      input.placeholder = placeholder;
+      if (required) input.required = true;
+      dynFieldGroup.appendChild(input);
+    }
+
+    if (isCustom) {
+      // Team A
+      const labelA = document.createElement('div');
+      labelA.style.cssText = 'color:var(--primary-glow);font-weight:700;font-family:Rajdhani,sans-serif;margin-top:.4rem;';
+      labelA.textContent = 'TEAM A';
+      dynFieldGroup.appendChild(labelA);
+      addInput('text', 'Team A Name');
+      for (let i = 1; i <= uidCount; i++) addInput('text', `Team A — Player ${i} UID`);
+
+      // Team B
+      const labelB = document.createElement('div');
+      labelB.style.cssText = 'color:var(--primary-glow);font-weight:700;font-family:Rajdhani,sans-serif;margin-top:.8rem;';
+      labelB.textContent = 'TEAM B';
+      dynFieldGroup.appendChild(labelB);
+      addInput('text', 'Team B Name');
+      for (let i = 1; i <= uidCount; i++) addInput('text', `Team B — Player ${i} UID`);
+
+      addInput('tel', 'Contact Mobile Number');
+      addInput('email', 'Email Address');
+    } else {
+      if (uidCount > 1) addInput('text', 'Team Name');
+      for (let i = 1; i <= uidCount; i++) {
+        const label = uidCount === 1 ? 'Player UID' : (i === 1 ? 'Leader UID' : `Player ${i} UID`);
+        addInput('text', label);
+      }
+      addInput('tel', 'Mobile Number');
+      addInput('email', 'Email Address');
+    }
+  }
+
+  registrationForm.addEventListener('submit', (e) => {
+    e.preventDefault();
+    closeModal();
+    const id = 'SF-' + Math.floor(100000 + Math.random() * 900000);
+    tournamentIdValue.textContent = id;
+    successOverlay.classList.add('active');
+    document.body.style.overflow = 'hidden';
+  });
+
+  successCloseBtn.addEventListener('click', () => {
+    successOverlay.classList.remove('active');
+    document.body.style.overflow = '';
+    registrationForm.reset();
+  });
+  successOverlay.addEventListener('click', (e) => {
+    if (e.target === successOverlay) {
+      successOverlay.classList.remove('active');
+      document.body.style.overflow = '';
+    }
+  });
+
+  // ===== COUNTDOWN TIMER =====
+  const cdDays = document.getElementById('cdDays');
+  const cdHours = document.getElementById('cdHours');
+  const cdMins = document.getElementById('cdMins');
+  const cdSecs = document.getElementById('cdSecs');
+
+  if (cdDays) {
+    const targetDate = new Date('2026-06-25T18:00:00').getTime();
+    function pad(n) { return String(n).padStart(2, '0'); }
+    function updateCountdown() {
+      const now = Date.now();
+      let diff = targetDate - now;
+      if (diff < 0) diff = 0;
+      const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+      const hours = Math.floor((diff / (1000 * 60 * 60)) % 24);
+      const mins = Math.floor((diff / (1000 * 60)) % 60);
+      const secs = Math.floor((diff / 1000) % 60);
+      cdDays.textContent = pad(days);
+      cdHours.textContent = pad(hours);
+      cdMins.textContent = pad(mins);
+      cdSecs.textContent = pad(secs);
+    }
+    updateCountdown();
+    setInterval(updateCountdown, 1000);
+  }
+})();
+</script>
+
+
+<!-- FOOTER / COPYRIGHT -->
+<footer style="background: linear-gradient(135deg, rgba(4,8,5,.98), rgba(4,8,5,.95)); border-top: 2px solid rgba(16,185,129,0.25); padding: 3rem 6%; text-align: center;">
+    <div style="max-width: 900px; margin: 0 auto;">
+        <p style="color: var(--text-dim); font-size: 0.95rem; margin-bottom: 1rem; line-height: 1.6;">
+            Strike Esports © 2026. All rights reserved. | Compete Beyond Limits.
+        </p>
+        <p style="color: var(--text-dim); font-size: 0.85rem;">
+            Designed & Built with <span style="color: #FF6B35;">❤️</span> | Terms of Service | Privacy Policy
+        </p>
+    </div>
+</footer>
+</body>
+</html>
