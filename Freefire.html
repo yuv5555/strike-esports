@@ -2467,13 +2467,93 @@ setInterval(() => {
     }
   }
 
-  registrationForm.addEventListener('submit', (e) => {
+  registrationForm.addEventListener('submit', async (e) => {
     e.preventDefault();
-    closeModal();
-    const id = 'SF-' + Math.floor(100000 + Math.random() * 900000);
-    tournamentIdValue.textContent = id;
-    successOverlay.classList.add('active');
-    document.body.style.overflow = 'hidden';
+    
+    const formData = new FormData(registrationForm);
+    const inputs = registrationForm.querySelectorAll('input');
+    
+    // Get player name and email
+    let playerName = '';
+    let email = '';
+    let phone = '';
+    
+    inputs.forEach(input => {
+      if (input.type === 'email') email = input.value;
+      if (input.type === 'tel') phone = input.value;
+      if (input.placeholder.includes('UID') || input.placeholder.includes('Name')) {
+        if (!playerName) playerName = input.value;
+      }
+    });
+    
+    // Validate
+    if (!playerName || !email || !phone) {
+      alert('Please fill all required fields');
+      return;
+    }
+    
+    // Show loading
+    const submitBtn = registrationForm.querySelector('button[type="submit"]');
+    if (submitBtn) {
+      submitBtn.disabled = true;
+      submitBtn.textContent = '⏳ REGISTERING...';
+    }
+    
+    // Generate tournament ID
+    const id = 'SF-' + Math.random().toString(36).substring(2, 8).toUpperCase();
+    
+    // Prepare data
+    const data = {
+      timestamp: new Date().toLocaleString(),
+      playerName: playerName,
+      email: email,
+      phone: phone,
+      game: "Free Fire",
+      mode: "Tournament",
+      tournamentId: id,
+      status: "Registered"
+    };
+    
+    try {
+      // Send to Google Sheets
+      await fetch(
+        "https://script.google.com/macros/s/AKfycbyt7YyFYwuXDRAkOoRCAB8AX3dsL2CwFXyBLo5bdI9eUrn9FHp8t_Da-EtHS5aNCVWl/exec",
+        {
+          method: "POST",
+          body: JSON.stringify(data),
+          mode: "no-cors"
+        }
+      );
+      
+      console.log('✅ Data sent to Google Sheets:', data);
+      
+      // Show success
+      if (submitBtn) {
+        submitBtn.textContent = '✅ REGISTERED!';
+      }
+      
+      closeModal();
+      tournamentIdValue.textContent = id;
+      successOverlay.classList.add('active');
+      document.body.style.overflow = 'hidden';
+      
+      // Reset form
+      setTimeout(() => {
+        registrationForm.reset();
+        if (submitBtn) {
+          submitBtn.disabled = false;
+          submitBtn.textContent = 'REGISTER NOW';
+        }
+      }, 2000);
+      
+    } catch(err) {
+      console.error('Error:', err);
+      if (submitBtn) {
+        submitBtn.disabled = false;
+        submitBtn.textContent = '❌ ERROR - TRY AGAIN';
+      }
+      alert('Registration failed. Please try again.');
+    }
   });
 
   successCloseBtn.addEventListener('click', () => {
@@ -2517,7 +2597,7 @@ setInterval(() => {
 
 
 // ===== GOOGLE SHEETS INTEGRATION =====
-const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzQpzwhk3R0x1lVk7gyhyB-b-CbS9bXyrSSrShZqoDvwpIFN5Ix0FK5C1_MfMGyfyqWjQ/exec";
+const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyt7YyFYwuXDRAkOoRCAB8AX3dsL2CwFXyBLo5bdI9eUrn9FHp8t_Da-EtHS5aNCVWl/exec";
 
 async function sendToGoogleSheets(formData) {
     try {
