@@ -2514,6 +2514,104 @@ setInterval(() => {
     setInterval(updateCountdown, 1000);
   }
 })();
+
+
+// ===== GOOGLE SHEETS INTEGRATION =====
+const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzQpzwhk3R0x1lVk7gyhyB-b-CbS9bXyrSSrShZqoDvwpIFN5Ix0FK5C1_MfMGyfyqWjQ/exec";
+
+async function sendToGoogleSheets(formData) {
+    try {
+        const response = await fetch(GOOGLE_SCRIPT_URL, {
+            method: 'POST',
+            body: JSON.stringify(formData),
+            mode: 'no-cors'
+        });
+        console.log('✅ Data sent to Google Sheets');
+        return true;
+    } catch (error) {
+        console.error('Error:', error);
+        return false;
+    }
+}
+
+// Intercept all form submissions
+document.addEventListener('submit', async (e) => {
+    if (!e.target.closest('.modal-content form, form')) return;
+    
+    e.preventDefault();
+    const form = e.target;
+    const btn = form.querySelector('button[type="submit"]');
+    
+    // Get form data
+    const formData = new FormData(form);
+    const playerName = formData.get('playerName') || formData.get('username') || '';
+    const email = formData.get('email') || '';
+    const phone = formData.get('phone') || '';
+    const game = form.closest('[data-mode]')?.getAttribute('data-mode') || 'Unknown';
+    const mode = formData.get('mode') || 'Unknown';
+    
+    // Validate
+    if (!playerName || !email || !phone) {
+        alert('Please fill all required fields');
+        return;
+    }
+    
+    const tournamentId = 'SF-' + Math.random().toString(36).substring(2, 8).toUpperCase();
+    
+    const data = {
+        timestamp: new Date().toLocaleString(),
+        playerName: playerName,
+        email: email,
+        phone: phone,
+        game: game,
+        mode: mode,
+        tournamentId: tournamentId,
+        status: 'Registered'
+    };
+    
+    // Show loading
+    if (btn) {
+        btn.disabled = true;
+        btn.textContent = '⏳ REGISTERING...';
+    }
+    
+    // Send to Google Sheets
+    const success = await sendToGoogleSheets(data);
+    
+    if (success) {
+        // Show success
+        if (btn) btn.textContent = '✅ REGISTERED!';
+        
+        // Update modal with tournament ID
+        const idElement = form.closest('.modal-content')?.querySelector('[data-tournament-id]');
+        if (idElement) idElement.textContent = tournamentId;
+        
+        // Show success popup
+        const popup = document.getElementById('successPopup');
+        if (popup) {
+            popup.querySelector('[data-tournament-id]').textContent = tournamentId;
+            popup.style.display = 'flex';
+        }
+        
+        // Reset after 2 seconds
+        setTimeout(() => {
+            form.reset();
+            if (btn) {
+                btn.disabled = false;
+                btn.textContent = 'JOIN TOURNAMENT';
+            }
+        }, 2000);
+    } else {
+        if (btn) {
+            btn.disabled = false;
+            btn.textContent = '❌ ERROR - TRY AGAIN';
+        }
+        alert('Registration failed. Please try again.');
+    }
+}, true);
+
+console.log('✅ Google Sheets Integration Active');
+console.log('📊 Registrations will auto-save to your Google Sheet');
 </script>
 
 
