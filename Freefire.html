@@ -2204,8 +2204,8 @@ url("freefire.jpg");
             Love Strike Esports? Support us by buying us a coffee! Your contribution helps us host better tournaments, improve our platform, and create more exciting esports experiences for the community.
         </p>
         
-        <a href="upi://pay?pa=strikeesports@upi" target="_blank" style="display: inline-block; background: linear-gradient(135deg, #FF813F, #FF6B35); color: white; padding: 14px 40px; border-radius: 50px; text-decoration: none; font-weight: 700; font-size: 1.05rem; letter-spacing: 1px; box-shadow: 0 10px 30px rgba(255, 107, 53, 0.4); transition: all 0.3s ease; font-family: 'Rajdhani', sans-serif; border: 2px solid transparent; cursor: pointer;">
-            ☕ SUPPORT VIA UPI
+        <a href="https://www.buymeacoffee.com/strikeesports" target="_blank" style="display: inline-block; background: linear-gradient(135deg, #FF813F, #FF6B35); color: white; padding: 14px 40px; border-radius: 50px; text-decoration: none; font-weight: 700; font-size: 1.05rem; letter-spacing: 1px; box-shadow: 0 10px 30px rgba(255, 107, 53, 0.4); transition: all 0.3s ease; font-family: 'Rajdhani', sans-serif; border: 2px solid transparent; cursor: pointer;">
+            ☕ BUY ME A COFFEE
         </a>
     </div>
 </section>
@@ -2428,11 +2428,12 @@ setInterval(() => {
 
     dynFieldGroup.innerHTML = '';
 
-    function addInput(type, placeholder, required = true) {
+    function addInput(type, placeholder, required = true, name = '') {
       const input = document.createElement('input');
       input.type = type;
       input.className = 'form-input';
       input.placeholder = placeholder;
+      input.name = name || placeholder.toLowerCase().replace(/\s+/g, '_');
       if (required) input.required = true;
       dynFieldGroup.appendChild(input);
     }
@@ -2443,144 +2444,37 @@ setInterval(() => {
       labelA.style.cssText = 'color:var(--primary-glow);font-weight:700;font-family:Rajdhani,sans-serif;margin-top:.4rem;';
       labelA.textContent = 'TEAM A';
       dynFieldGroup.appendChild(labelA);
-      addInput('text', 'Team A Name');
-      for (let i = 1; i <= uidCount; i++) addInput('text', `Team A — Player ${i} UID`);
+      addInput('text', 'Team A Name', true, 'team_a_name');
+      for (let i = 1; i <= uidCount; i++) addInput('text', `Team A — Player ${i} UID`, true, `uid${i}_team_a`);
 
       // Team B
       const labelB = document.createElement('div');
       labelB.style.cssText = 'color:var(--primary-glow);font-weight:700;font-family:Rajdhani,sans-serif;margin-top:.8rem;';
       labelB.textContent = 'TEAM B';
       dynFieldGroup.appendChild(labelB);
-      addInput('text', 'Team B Name');
-      for (let i = 1; i <= uidCount; i++) addInput('text', `Team B — Player ${i} UID`);
+      addInput('text', 'Team B Name', true, 'team_b_name');
+      for (let i = 1; i <= uidCount; i++) addInput('text', `Team B — Player ${i} UID`, true, `uid${i}_team_b`);
 
-      addInput('tel', 'Contact Mobile Number');
-      addInput('email', 'Email Address');
+      addInput('tel', 'Contact Mobile Number', true, 'mobile');
+      addInput('email', 'Email Address', true, 'gmail');
     } else {
-      if (uidCount > 1) addInput('text', 'Team Name');
+      if (uidCount > 1) addInput('text', 'Team Name', true, 'team_name');
       for (let i = 1; i <= uidCount; i++) {
         const label = uidCount === 1 ? 'Player UID' : (i === 1 ? 'Leader UID' : `Player ${i} UID`);
-        addInput('text', label);
+        addInput('text', label, true, `uid${i}`);
       }
-      addInput('tel', 'Mobile Number');
-      addInput('email', 'Email Address');
+      addInput('tel', 'Mobile Number', true, 'mobile');
+      addInput('email', 'Email Address', true, 'gmail');
     }
   }
 
-  registrationForm.addEventListener('submit', async (e) => {
+  registrationForm.addEventListener('submit', (e) => {
     e.preventDefault();
-    
-    const formData = new FormData(registrationForm);
-    const inputs = registrationForm.querySelectorAll('input');
-    
-    // Get player name and email
-    let playerName = '';
-    let email = '';
-    let phone = '';
-    
-    inputs.forEach(input => {
-      if (input.type === 'email') email = input.value;
-      if (input.type === 'tel') phone = input.value;
-      if (input.placeholder.includes('UID') || input.placeholder.includes('Name')) {
-        if (!playerName) playerName = input.value;
-      }
-    });
-    
-    // Validate
-    if (!playerName || !email || !phone) {
-      alert('Please fill all required fields');
-      return;
-    }
-    
-    // Show loading
-    const submitBtn = registrationForm.querySelector('button[type="submit"]');
-    if (submitBtn) {
-      submitBtn.disabled = true;
-      submitBtn.textContent = '⏳ REGISTERING...';
-    }
-    
-    // Generate tournament ID
-    const id = 'SF-' + Math.random().toString(36).substring(2, 8).toUpperCase();
-    
-    // Prepare data
-    const data = {
-      timestamp: new Date().toLocaleString(),
-      playerName: playerName,
-      email: email,
-      phone: phone,
-      game: "Free Fire",
-      mode: "Tournament",
-      tournamentId: id,
-      status: "Registered"
-    };
-    
-    try {
-      // Prepare data matching Google Apps Script format
-      const requestData = {
-        game: game,
-        mode: mode,
-        player: player,
-        gmail: gmail,
-        uid1: uid1,
-        uid2: uid2,
-        uid3: uid3,
-        uid4: uid4,
-        mobile: mobile
-      };
-      
-      console.log('📤 Sending data:', requestData);
-      
-      // Send to Google Sheets
-      const response = await fetch(
-        "https://script.google.com/macros/s/AKfycbyt7YyFYwuXDRAkOoRCAB8AX3dsL2CwFXyBLo5bdI9eUrn9FHp8t_Da-EtHS5aNCVWl/exec",
-        {
-          method: "POST",
-          body: JSON.stringify(requestData),
-          mode: "no-cors"
-        }
-      );
-      
-      console.log('✅ Data sent to Google Sheets successfully');
-      
-      // Generate tournament ID only after success
-      const tournamentId = 'SF-' + Math.random().toString(36).substring(2, 8).toUpperCase();
-      
-      // Show success
-      if (submitBtn) {
-        submitBtn.textContent = '✅ REGISTERED!';
-      }
-      
-      closeModal();
-      
-      // Update and show success modal with real tournament ID
-      const idDisplay = document.getElementById('tournamentIdValue');
-      if (idDisplay) idDisplay.textContent = tournamentId;
-      
-      const overlay = document.getElementById('successOverlay');
-      if (overlay) {
-        overlay.classList.add('active');
-        document.body.style.overflow = 'hidden';
-      }
-      
-      console.log('✅ Registration successful with ID:', tournamentId);
-      
-      // Reset form after 3 seconds
-      setTimeout(() => {
-        registrationForm.reset();
-        if (submitBtn) {
-          submitBtn.disabled = false;
-          submitBtn.textContent = 'REGISTER NOW';
-        }
-      }, 3000);
-      
-    } catch(err) {
-      console.error('❌ Registration Error:', err);
-      if (submitBtn) {
-        submitBtn.disabled = false;
-        submitBtn.textContent = '❌ ERROR - TRY AGAIN';
-      }
-      alert('Registration failed: ' + err.message + '. Please check your connection and try again.');
-    }
+    closeModal();
+    const id = 'SF-' + Math.floor(100000 + Math.random() * 900000);
+    tournamentIdValue.textContent = id;
+    successOverlay.classList.add('active');
+    document.body.style.overflow = 'hidden';
   });
 
   successCloseBtn.addEventListener('click', () => {
@@ -2621,104 +2515,6 @@ setInterval(() => {
     setInterval(updateCountdown, 1000);
   }
 })();
-
-
-// ===== GOOGLE SHEETS INTEGRATION =====
-const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyt7YyFYwuXDRAkOoRCAB8AX3dsL2CwFXyBLo5bdI9eUrn9FHp8t_Da-EtHS5aNCVWl/exec";
-
-async function sendToGoogleSheets(formData) {
-    try {
-        const response = await fetch(GOOGLE_SCRIPT_URL, {
-            method: 'POST',
-            body: JSON.stringify(formData),
-            mode: 'no-cors'
-        });
-        console.log('✅ Data sent to Google Sheets');
-        return true;
-    } catch (error) {
-        console.error('Error:', error);
-        return false;
-    }
-}
-
-// Intercept all form submissions
-document.addEventListener('submit', async (e) => {
-    if (!e.target.closest('.modal-content form, form')) return;
-    
-    e.preventDefault();
-    const form = e.target;
-    const btn = form.querySelector('button[type="submit"]');
-    
-    // Get form data
-    const formData = new FormData(form);
-    const playerName = formData.get('playerName') || formData.get('username') || '';
-    const email = formData.get('email') || '';
-    const phone = formData.get('phone') || '';
-    const game = form.closest('[data-mode]')?.getAttribute('data-mode') || 'Unknown';
-    const mode = formData.get('mode') || 'Unknown';
-    
-    // Validate
-    if (!playerName || !email || !phone) {
-        alert('Please fill all required fields');
-        return;
-    }
-    
-    const tournamentId = 'SF-' + Math.random().toString(36).substring(2, 8).toUpperCase();
-    
-    const data = {
-        timestamp: new Date().toLocaleString(),
-        playerName: playerName,
-        email: email,
-        phone: phone,
-        game: game,
-        mode: mode,
-        tournamentId: tournamentId,
-        status: 'Registered'
-    };
-    
-    // Show loading
-    if (btn) {
-        btn.disabled = true;
-        btn.textContent = '⏳ REGISTERING...';
-    }
-    
-    // Send to Google Sheets
-    const success = await sendToGoogleSheets(data);
-    
-    if (success) {
-        // Show success
-        if (btn) btn.textContent = '✅ REGISTERED!';
-        
-        // Update modal with tournament ID
-        const idElement = form.closest('.modal-content')?.querySelector('[data-tournament-id]');
-        if (idElement) idElement.textContent = tournamentId;
-        
-        // Show success popup
-        const popup = document.getElementById('successPopup');
-        if (popup) {
-            popup.querySelector('[data-tournament-id]').textContent = tournamentId;
-            popup.style.display = 'flex';
-        }
-        
-        // Reset after 2 seconds
-        setTimeout(() => {
-            form.reset();
-            if (btn) {
-                btn.disabled = false;
-                btn.textContent = 'JOIN TOURNAMENT';
-            }
-        }, 2000);
-    } else {
-        if (btn) {
-            btn.disabled = false;
-            btn.textContent = '❌ ERROR - TRY AGAIN';
-        }
-        alert('Registration failed. Please try again.');
-    }
-}, true);
-
-console.log('✅ Google Sheets Integration Active');
-console.log('📊 Registrations will auto-save to your Google Sheet');
 </script>
 
 
