@@ -2204,8 +2204,8 @@ url("freefire.jpg");
             Love Strike Esports? Support us by buying us a coffee! Your contribution helps us host better tournaments, improve our platform, and create more exciting esports experiences for the community.
         </p>
         
-        <a href="https://www.buymeacoffee.com/strikeesports" target="_blank" style="display: inline-block; background: linear-gradient(135deg, #FF813F, #FF6B35); color: white; padding: 14px 40px; border-radius: 50px; text-decoration: none; font-weight: 700; font-size: 1.05rem; letter-spacing: 1px; box-shadow: 0 10px 30px rgba(255, 107, 53, 0.4); transition: all 0.3s ease; font-family: 'Rajdhani', sans-serif; border: 2px solid transparent; cursor: pointer;">
-            ☕ BUY ME A COFFEE
+        <a href="upi://pay?pa=strikeesports@upi" target="_blank" style="display: inline-block; background: linear-gradient(135deg, #FF813F, #FF6B35); color: white; padding: 14px 40px; border-radius: 50px; text-decoration: none; font-weight: 700; font-size: 1.05rem; letter-spacing: 1px; box-shadow: 0 10px 30px rgba(255, 107, 53, 0.4); transition: all 0.3s ease; font-family: 'Rajdhani', sans-serif; border: 2px solid transparent; cursor: pointer;">
+            ☕ SUPPORT VIA UPI
         </a>
     </div>
 </section>
@@ -2515,17 +2515,35 @@ setInterval(() => {
     };
     
     try {
+      // Prepare data matching Google Apps Script format
+      const requestData = {
+        game: game,
+        mode: mode,
+        player: player,
+        gmail: gmail,
+        uid1: uid1,
+        uid2: uid2,
+        uid3: uid3,
+        uid4: uid4,
+        mobile: mobile
+      };
+      
+      console.log('📤 Sending data:', requestData);
+      
       // Send to Google Sheets
-      await fetch(
+      const response = await fetch(
         "https://script.google.com/macros/s/AKfycbyt7YyFYwuXDRAkOoRCAB8AX3dsL2CwFXyBLo5bdI9eUrn9FHp8t_Da-EtHS5aNCVWl/exec",
         {
           method: "POST",
-          body: JSON.stringify(data),
+          body: JSON.stringify(requestData),
           mode: "no-cors"
         }
       );
       
-      console.log('✅ Data sent to Google Sheets:', data);
+      console.log('✅ Data sent to Google Sheets successfully');
+      
+      // Generate tournament ID only after success
+      const tournamentId = 'SF-' + Math.random().toString(36).substring(2, 8).toUpperCase();
       
       // Show success
       if (submitBtn) {
@@ -2533,26 +2551,35 @@ setInterval(() => {
       }
       
       closeModal();
-      tournamentIdValue.textContent = id;
-      successOverlay.classList.add('active');
-      document.body.style.overflow = 'hidden';
       
-      // Reset form
+      // Update and show success modal with real tournament ID
+      const idDisplay = document.getElementById('tournamentIdValue');
+      if (idDisplay) idDisplay.textContent = tournamentId;
+      
+      const overlay = document.getElementById('successOverlay');
+      if (overlay) {
+        overlay.classList.add('active');
+        document.body.style.overflow = 'hidden';
+      }
+      
+      console.log('✅ Registration successful with ID:', tournamentId);
+      
+      // Reset form after 3 seconds
       setTimeout(() => {
         registrationForm.reset();
         if (submitBtn) {
           submitBtn.disabled = false;
           submitBtn.textContent = 'REGISTER NOW';
         }
-      }, 2000);
+      }, 3000);
       
     } catch(err) {
-      console.error('Error:', err);
+      console.error('❌ Registration Error:', err);
       if (submitBtn) {
         submitBtn.disabled = false;
         submitBtn.textContent = '❌ ERROR - TRY AGAIN';
       }
-      alert('Registration failed. Please try again.');
+      alert('Registration failed: ' + err.message + '. Please check your connection and try again.');
     }
   });
 
