@@ -182,7 +182,7 @@
     }
   }
 
-  const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxs01V3-kPSiRTod_A7oFlo1w7AAAPfozr0OCR0ME3uhYXHMNLaQKN632oeL7B0ER8/exec';
+  const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyhl674-W0FOwSqL3U581Pm77fJO4PDq6P9jiiNU9IK23MHM5QI0kR13hwPVenSRjOc/exec';
 
   async function sendToGoogleSheets(data) {
     try {
